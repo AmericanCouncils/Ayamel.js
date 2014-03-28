@@ -1,0 +1,9 @@
+{
+  "name": "ayamel.js",
+  "version": "0.1.0",
+  "author": "BYU-ARCLITE",
+  "description": "Client-side services and display elements for the Flagship Media Library interface",
+  "dependencies": {
+    "timed-text": "0.1.x"
+  }
+}

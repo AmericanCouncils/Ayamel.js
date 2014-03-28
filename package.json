@@ -5,7 +5,7 @@
   "description": "Client-side services and display elements for the Flagship Media Library interface",
   "repository": {
     "type": "git",
-    "url": "https://github.com/BYU-ARCLITE/TimedText.git"
+    "url": "https://github.com/BYU-ARCLITE/Ayamel.js.git"
   },
   "dependencies": {
     "timed-text": "0.1.x"

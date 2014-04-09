@@ -1,34 +1,37 @@
+
 (function (Ayamel, global) {
     "use strict";
-
+ 
     var template = '<div class="videoBox"><div id="youtubePlayer"></div></div>',
         captionHolderTemplate = '<div class="videoCaptionHolder"></div>',
-		watchReg = /https?:\/\/www\.youtube\.com\/watch\?v=(.*)/i,
-		shortReg = /https?:\/\/youtu\.be\/(.*)/i,
+        urlRegexen = [
+            new RegExp("youtube://([A-Za-z0-9]+)", "i"),
+            new RegExp("https?://(?:www\\.)?youtube\\.com/watch\\?v=([A-Za-z0-9]+)", "i"),
+            new RegExp("https?://(?:www\\.)?youtube\\.com/v/([A-Za-z0-9]+)", "i"),
+            new RegExp("https?://youtu\\.be/([A-Za-z0-9]+)", "i")
+        ],
         counter = 0;
-
+ 
     function genId(){
         counter++;
         return "AyamelYTPlayer-"+counter.toString(36);
     }
-
-    function supportsFile(file) {
-        return file.streamUri &&
-            (file.streamUri.substr(0, 10) === "youtube://"
-            || watchReg.test(file.streamUri)
-            || shortReg.test(file.streamUri));
-    }
-
+ 
     function getYouTubeId(url) {
-		var match;
-        if (url.substr(0, 10) === "youtube://") {
-            return url.substr(10);
+        if (typeof url !== "string") { return ""; }
+ 
+        var i;
+        for (i=0; i<urlRegexen.length; ++i) {
+            var match = urlRegexen[i].exec(url);
+            if (match) { return match[1]; }
         }
-		match = watchReg.exec(url) || shortReg(url)
-		if(match){ return match[1]; }
         return "";
     }
-
+ 
+    function supportsFile(file) {
+        return getYouTubeId(file.streamUri) !== "";
+    }
+ 
     function findFile(resource) {
         var file, i;
         for (i=0; i<resource.content.files.length; i += 1) {
@@ -38,7 +41,7 @@
         }
         return null;
     }
-
+ 
     function YouTubePlayer(args) {
         var _this = this,
             height, width,
@@ -49,34 +52,34 @@
             element = $element[0],
             $captionsElement = $(captionHolderTemplate),
             captionsElement = $captionsElement[0];
-
+ 
         // Create the element
         this.$element = $element;
         this.element = element;
         args.$holder.append($element);
-
+ 
         this.video = null;
-
+ 
         // Create a place for captions
         this.$captionsElement = $captionsElement;
         this.captionsElement = captionsElement;
         args.$holder.append($captionsElement);
-
+ 
         // Set up the aspect ratio
         //TODO: check for height overflow and resize smaller if necessary
         args.aspectRatio = args.aspectRatio || Ayamel.aspectRatios.hdVideo;
         width = $element.width();
         height = width / args.aspectRatio;
         $element.height(height);
-
+ 
         // Include the YouTube API for a chromeless player
         // Docs here: https://developers.google.com/youtube/js_api_reference
         swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3",
             "youtubePlayer", width, height, "8", null, null,
             { allowScriptAccess: "always", wmode: "transparent" }, { id: idstr });
-
+ 
         //TODO: Set up properties object to allow interactions before YouTube has loaded
-
+ 
         Object.defineProperties(this, {
             init: {
                 value: function() {
@@ -84,11 +87,11 @@
                         video = $video[0],
                         played = false,
                         playing = false;
-
+ 
                     $video.width("100%").height("100%");
-
+ 
                     this.video = video;
-
+ 
                     // Load the source
                     video.loadVideoById({
                         videoId: getYouTubeId(findFile(args.resource).streamUri),
@@ -97,12 +100,12 @@
                         suggestedQuality: "large"
                     });
                     video.pauseVideo();
-
+ 
                     function timeUpdate() {
                         var timeEvent = document.createEvent("HTMLEvents");
                         timeEvent.initEvent("timeupdate", true, true);
                         element.dispatchEvent(timeEvent);
-
+ 
                         if (!playing) { return; }
                         if(Ayamel.utils.Animation){
                             Ayamel.utils.Animation.requestFrame(timeUpdate);
@@ -110,7 +113,7 @@
                             setTimeout(timeUpdate, 50);
                         }
                     }
-
+ 
                     // Set up events. Unfortunately the YouTube API requires the callback to be in the global namespace.
                     window.youtubeStateChange = function(data) {
                         if(data === -1) { return; }
@@ -121,7 +124,7 @@
                             3: "durationchange",
                             5: 'loading'
                         }[data],{bubbles:true,cancelable:true}));
-
+ 
                         // If we started playing then send out timeupdate events
                         if (data === 1) {
                             playing = true;
@@ -132,7 +135,7 @@
                                 played = true;
                                 element.dispatchEvent(new Event('durationchange',{bubbles:true,cancelable:true}));
                             }
-
+ 
                             playing = false;
                         }
                     };
@@ -152,7 +155,7 @@
                     return this.video ? this.video.getCurrentTime() : 0;
                 },
                 set: function (time) {
-					if(!this.video){ return 0; }
+                    if(!this.video){ return 0; }
                     time = Math.floor((+time||0)* 100) / 100;
                     this.video.seekTo(time);
                     this.element.dispatchEvent(new Event('timeupdate',{bubbles:true,cancelable:true}));
@@ -164,7 +167,7 @@
                     return this.video ? this.video.isMuted() : false;
                 },
                 set: function (muted) {
-					if(!this.video){ return false; }
+                    if(!this.video){ return false; }
                     muted = !!muted;
                     this.video[muted?'mute':'unMute']();
                     return muted;
@@ -180,7 +183,7 @@
                     return this.video ? this.video.getPlaybackRate() : 1;
                 },
                 set: function (playbackRate) {
-					if(!this.video){ return 1; }
+                    if(!this.video){ return 1; }
                     var i, ratelist, best, next, bdist, ndist;
                     playbackRate = +playbackRate
                     if(isNaN(playbackRate)){ playbackRate = 1; }
@@ -209,7 +212,7 @@
                     return this.video ? this.video.getVolume() / 100 : 1;
                 },
                 set: function (volume) {
-					if(!this.video){ return 1; }
+                    if(!this.video){ return 1; }
                     volume = (+volume||0);
                     this.video.setVolume(volume * 100);
                     return volume;
@@ -217,26 +220,26 @@
             }
         });
     }
-
+ 
     YouTubePlayer.prototype.play = function() {
-		if(!this.video){ return; }
+        if(!this.video){ return; }
         this.video.playVideo();
     };
-
+ 
     YouTubePlayer.prototype.pause = function() {
-		if(!this.video){ return; }
+        if(!this.video){ return; }
         this.video.pauseVideo();
     };
-
+ 
     YouTubePlayer.prototype.enterFullScreen = function(availableHeight) {
         this.normalHeight = this.$element.height();
         this.$element.height(availableHeight);
     };
-
+ 
     YouTubePlayer.prototype.exitFullScreen = function() {
         this.$element.height(this.normalHeight);
     };
-
+ 
     Ayamel.mediaPlugins.video.youtube = {
         install: function(args) {
             var player = new YouTubePlayer(args);
@@ -269,6 +272,6 @@
             }
         }
     };
-
-
+ 
+ 
 }(Ayamel, window));

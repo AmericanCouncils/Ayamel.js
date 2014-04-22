@@ -90,6 +90,12 @@ var Ayamel = (function() {
 					if(k >= 0){ i = k; }
 				}
 				return text.substring(0,i).search(l_exp) >= 0 ? 'ltr' : 'rtl';
+			},
+			correctUriForHttps: function(uri){
+				if (window.location.protocol == 'https:') {
+					uri = uri.replace(/^http:/, "https:");
+				}
+				return uri;
 			}
 		}
     };

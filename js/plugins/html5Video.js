@@ -69,7 +69,7 @@
 
         // Load the source
         file = findFile.call(this, args.resource);
-        video.src = file.downloadUri;
+        video.src = Ayamel.utils.correctUriForHttps(file.downloadUri);
 
         // Set up event propagation
         Object.keys(events).forEach(function (eventName) {

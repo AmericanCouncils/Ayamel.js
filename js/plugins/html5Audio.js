@@ -64,7 +64,7 @@
 
         // Load the source
         file = findFile.call(this, args.resource);
-        audio.src = file.downloadUri;
+        audio.src = Ayamel.utils.correctUriForHttps(file.downloadUri);
 
         // Set up event propagation
         Object.keys(events).forEach(function (eventName) {

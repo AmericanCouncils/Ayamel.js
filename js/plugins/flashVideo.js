@@ -89,7 +89,7 @@
                 backgroundGradient: "none"
             },
             clip: {
-                url: findFile(args.resource).downloadUri,
+                url: Ayamel.utils.correctUriForHttps(findFile(args.resource).downloadUri),
                 autoPlay: false,
                 autoBuffering: true,
                 scaling: "fit",

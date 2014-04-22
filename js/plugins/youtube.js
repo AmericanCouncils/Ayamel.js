@@ -74,7 +74,9 @@
  
         // Include the YouTube API for a chromeless player
         // Docs here: https://developers.google.com/youtube/js_api_reference
-        swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3",
+        var youtubeUrl ="http://www.youtube.com/apiplayer?enablejsapi=1&version=3";
+        youtubeUrl = Ayamel.utils.correctUriForHttps(youtubeUrl);
+        swfobject.embedSWF(youtubeUrl,
             "youtubePlayer", width, height, "8", null, null,
             { allowScriptAccess: "always", wmode: "transparent" }, { id: idstr });
  

@@ -6,9 +6,9 @@
         captionHolderTemplate = '<div class="videoCaptionHolder"></div>',
         urlRegexen = [
             new RegExp("youtube://([A-Za-z0-9]+)", "i"),
-            new RegExp("https?://(?:www\\.)?youtube\\.com/watch\\?v=([A-Za-z0-9]+)", "i"),
-            new RegExp("https?://(?:www\\.)?youtube\\.com/v/([A-Za-z0-9]+)", "i"),
-            new RegExp("https?://youtu\\.be/([A-Za-z0-9]+)", "i")
+            new RegExp("https?://(?:www\\.)?youtube\\.com/watch\\?v=([A-Za-z0-9_-]+)", "i"),
+            new RegExp("https?://(?:www\\.)?youtube\\.com/v/([A-Za-z0-9_-]+)", "i"),
+            new RegExp("https?://youtu\\.be/([A-Za-z0-9_-]+)", "i")
         ],
         counter = 0;
  

@@ -128,6 +128,9 @@
     background: #333;
     position: relative;
     cursor: default;
+    font-size: 14px;
+    line-height: 20px;
+    font-family: sans-serif;
 
     -webkit-border-radius: 0 0 8px 8px;
     -moz-border-radius: 0 0 8px 8px;
